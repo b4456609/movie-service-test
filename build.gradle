@@ -5,8 +5,7 @@ plugins {
 }
 
 ext{
-  mgp = System.getenv("MGP");
-  target = System.getenv("TARGET");
+  data = System.getenv("PACT_DATA");
 }
 
 pact {
@@ -18,12 +17,11 @@ pact {
     }
 }
 
-task configure() {
-  def apiurl = "http://"+ mgp + "/api/regression/serviceTest/" + target
-  def p = new URL(apiurl).text
-  println p
-
-  def json = new JsonSlurper().parseText(p)
+task configure {
+  String fileContents = new File('./test.json').text
+  println fileContents
+  def json = new JsonSlurper().parseText(fileContents)
+  println json
   
   // println json
   project.pact.serviceProviders{
