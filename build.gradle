@@ -1,11 +1,7 @@
 import groovy.json.JsonSlurper
 plugins {
   id 'java'
-  id "au.com.dius.pact" version "3.3.6"
-}
-
-ext{
-  data = System.getenv("PACT_DATA");
+  id "au.com.dius.pact" version "3.3.8"
 }
 
 pact {
@@ -18,25 +14,25 @@ pact {
 }
 
 task configure {
-  String fileContents = new File('./test.json').text
-  println fileContents
-  def json = new JsonSlurper().parseText(fileContents)
-  println json
-  
-  // println json
-  project.pact.serviceProviders{
-    json.each{ provider ->
-      "${provider.provider}"{
-        host=System.getenv("${provider.host}")
-        port=System.getenv("${provider.port}")
-        provider.hasPactWith.each { consumer ->
-          hasPactWith("${consumer.consumer}"){
-            pactFile=url("${consumer.pactFile}")
-            stateChange = url('http://' + System.getenv("${provider.host}") + ':' + System.getenv("${provider.port}") + '/serviceTest')
-          }
+      String fileContents = new File('./test.json').text
+      println fileContents
+      def json = new JsonSlurper().parseText(fileContents)
+      println json
+      
+      // println json
+      project.pact.serviceProviders{
+        json.each{ provider ->
+          "${provider.provider}"{
+            host=System.getenv("${provider.host}")
+            port=System.getenv("${provider.port}")
+            provider.hasPactWith.each { consumer ->
+              hasPactWith("${consumer.consumer}"){
+                pactFile=url("${consumer.pactFile}")
+                stateChange = url('http://' + System.getenv("${provider.host}") + ':' + System.getenv("${provider.port}") + '/serviceTest')
+              }
+            }
+          }    
         }
-      }    
-    }
-  println project.pact.serviceProviders
-  }
+      println project.pact.serviceProviders
+      }
 }
