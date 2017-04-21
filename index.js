@@ -1,6 +1,7 @@
 var execSync = require('child_process').execSync;
 var http = require('http');
 var fs = require('fs');
+var time = 0;
 
 function writeFile(data) {
     return new Promise(
@@ -19,11 +20,28 @@ function writeFile(data) {
 function runTest() {
     return new Promise(
         function (resolve, reject) {
-            var cmd = './gradlew clean configure pactVerify';
+            var cmd = './gradlew configure pactVerify';
             console.log(cmd)
 
-            var history = execSync(cmd, { encoding: 'utf8', env: process.env });
+            var history = execSync(cmd, { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
             console.log(history);
+            resolve();
+        });
+}
+
+function renameTest() {
+    return new Promise(
+        function (resolve, reject) {
+            const reportFolder = './build/reports/pact';
+            fs.readdir(reportFolder, (err, files) => {
+                console.log(files)
+                files.forEach(file => {
+                    if (!file.startsWith("_")) {
+                        fs.renameSync(`${reportFolder}/${file}`, `${reportFolder}/_${time}_${file}`);
+                    }
+                    resolve();
+                });
+            })
         });
 }
 
@@ -49,9 +67,14 @@ function getRegreesionInfo(callback) {
 }
 
 function runStretegy(data) {
+
+    execSync('./gradlew clean', { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
+
     for (let item of data) {
+        time++;
         writeFile(item)
-            .then(runTest);
+            .then(runTest)
+            .then(renameTest);
     }
 }
 
