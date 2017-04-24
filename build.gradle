@@ -10,35 +10,46 @@ ext{
 }
 
 pact {
+    serviceProviders {
+        user {
+
+          protocol = 'http'
+          host = System.getenv( 'USER_HOST' )
+          port = System.getenv( 'USER_PORT' )
+          path = '/'
+          
+
+          hasPactsFromPactBroker(System.getenv( 'PACT_URL' )){ consumer ->
+                stateChange = url("http://${host}:${port}/serviceTest")
+          }
+        }
+        theater {
+
+          protocol = 'http'
+          host = System.getenv( 'THEATER_HOST' )
+          port = System.getenv( 'THEATER_PORT' )
+          path = '/'
+
+          hasPactsFromPactBroker(System.getenv( 'PACT_URL' )){ consumer ->
+                stateChange = url("http://${host}:${port}/serviceTest")
+          }
+        }
+        movie {
+
+          protocol = 'http'
+          host = System.getenv( 'MOVIE_HOST' )
+          port = System.getenv( 'MOVIE_PORT' )
+          path = '/'
+
+          hasPactsFromPactBroker(System.getenv( 'PACT_URL' )){ consumer ->
+                stateChange = url("http://${host}:${port}/serviceTest")
+          }
+        }
+    }
    reports {
       defaultReports() // adds the standard console output
 
       markdown // report in markdown format
       json // report in json format
     }
-}
-
-task configure() {
-  def apiurl = "http://"+ mgp + "/api/regression/serviceTest/" + target
-  def p = new URL(apiurl).text
-  println p
-
-  def json = new JsonSlurper().parseText(p)
-  
-  // println json
-  project.pact.serviceProviders{
-    json.each{ provider ->
-      "${provider.provider}"{
-        host=System.getenv("${provider.host}")
-        port=System.getenv("${provider.port}")
-        provider.hasPactWith.each { consumer ->
-          hasPactWith("${consumer.consumer}"){
-            pactFile=url("${consumer.pactFile}")
-            stateChange = url('http://' + System.getenv("${provider.host}") + ':' + System.getenv("${provider.port}") + '/serviceTest')
-          }
-        }
-      }    
-    }
-  println project.pact.serviceProviders
-  }
 }
