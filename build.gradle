@@ -4,11 +4,6 @@ plugins {
   id "au.com.dius.pact" version "3.3.6"
 }
 
-ext{
-  mgp = System.getenv("MGP");
-  target = System.getenv("TARGET");
-}
-
 pact {
     serviceProviders {
         user {
