@@ -6,7 +6,7 @@ var time = 0;
 function writeFile(data) {
     return new Promise(
         function (resolve, reject) {
-            fs.writeFile("./test.json", JSON.stringify(data), function (err) {
+            fs.writeFile("./test.json", JSON.stringify([data]), function (err) {
                 if (err) {
                     return console.log(err);
                     reject(err);
@@ -20,7 +20,7 @@ function writeFile(data) {
 function runTest() {
     return new Promise(
         function (resolve, reject) {
-            var cmd = './gradlew configure pactVerify';
+            var cmd = './gradlew pactVerify';
             console.log(cmd)
 
             var history = execSync(cmd, { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
@@ -66,15 +66,17 @@ function getRegreesionInfo(callback) {
         });
 }
 
-function runStretegy(data) {
+async function runStretegy(data) {
 
-    execSync('./gradlew clean', { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
+    execSync('rm -rf build', { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
 
     for (let item of data) {
         time++;
-        writeFile(item)
-            .then(runTest)
-            .then(renameTest);
+        for (let testcase of item){
+            await writeFile(testcase)
+            await runTest()
+        }
+        await renameTest()
     }
 }
 
