@@ -70,12 +70,17 @@ async function runStretegy(data) {
 
     execSync('rm -rf build', { encoding: 'utf8', env: process.env, stdio: [0, 1, 2] });
 
-    for (let item of data) {
-        time++;
-        for (let testcase of item){
-            await writeFile(testcase)
-            await runTest()
+    try {
+        for (let item of data) {
+            time++;
+            for (let testcase of item) {
+                await writeFile(testcase)
+                await runTest()
+            }
+            await renameTest()
         }
+    } catch (err) {
+        console.log(err); // oh noes, we got an error
         await renameTest()
     }
 }
